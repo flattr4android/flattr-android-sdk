@@ -1,26 +1,16 @@
-/**
- * Flattr Android SDK
+/* Copyright (c) 2010-2011 Flattr4Android
  *
- * Copyright (C) 2010 Flattr4Android - Philippe Bernard
- *   http://flattr4android.com
- *   
- * This software is the confidential and proprietary information of
- * Flattr4Android ("Confidential Information"). You shall not
- * disclose modify or reproduce such Confidential Information unless
- * separate appropriate license rights are granted by Flattr4Android
- * and shall use it only in accordance with the terms of the
- * license agreement you entered into with Flattr4Android.
- * 
- * DISCLAIMER OF WARRANTY:
- * 
- * THIS DOCUMENT IS PROVIDED "AS IS" AND ALL EXPRESS OR IMPLIED
- * CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING, BUT NOT LIMITED 
- * TO, ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE OR NON-INFRINGEMENT, ARE DISCLAIMED, EXCEPT TO THE EXTENT THAT
- * SUCH DISCLAIMERS ARE HELD TO BE LEGALLY INVALID. FLATTR4ANDROID
- * SHALL NOT BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR
- * CONSEQUENTIAL DAMAGES OF ANY KIND, ARISING OUT OF OR IN CONNECTION
- * WITH THE USE OF THIS SOFTWARE OR ITS DERIVATIVES.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.flattr4android.sdk;
 
