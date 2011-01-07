@@ -78,6 +78,7 @@ public class FlattrButton extends View {
 	public FlattrButton(Context context) throws FlattrSDKException {
 		super(context);
 		initResources();
+		initListener();
 	}
 
 	public FlattrButton(Context context, AttributeSet attrs)
@@ -94,7 +95,10 @@ public class FlattrButton extends View {
 			setButtonStyle(style);
 		}
 		initResources();
+		initListener();
+	}
 
+	private void initListener() {
 		setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {
