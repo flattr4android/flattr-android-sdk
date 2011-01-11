@@ -10,7 +10,7 @@
 
   <issueManagement>
     <system>Github Issue Tracker</system>
-    <url>http://github.com/flattr4android/java-flattr-rest/issues</url>
+    <url>https://github.com/flattr4android/flattr-android-sdk/issues</url>
   </issueManagement>
 
   <developers>
@@ -32,9 +32,9 @@
   </licenses>
 
   <scm>
-    <url>http://github.com/flattr4android/java-flattr-rest</url>
-    <connection>scm:git:git://github.com:flattr4android/java-flattr-rest.git</connection>
-    <developerConnection>scm:git:git@github.com:flattr4android/java-flattr-rest.git</developerConnection>
+    <url>https://github.com/flattr4android/flattr-android-sdk</url>
+    <connection>scm:git:git://github.com/flattr4android/flattr-android-sdk.git</connection>
+    <developerConnection>scm:git:git@github.com:flattr4android/flattr-android-sdk.git</developerConnection>
   </scm>
 
   <properties>
@@ -92,15 +92,10 @@
 
   <distributionManagement>
     <repository>
-      <id>java-flattr-rest-releases</id>
-      <name>java-flattr-rest Release Repository</name>
-      <url>http://flattr4android.com/repositories/flattr-android-sdk/releases</url>
+      <id>flattr-android-sdk-releases</id>
+      <name>Flattr Android SDK Release Repository</name>
+      <url>https://github.com/flattr4android/flattr-android-sdk/archives/master</url>
     </repository>
-    <snapshotRepository>
-      <id>java-flattr-rest-snapshots</id>
-      <name>java-flattr-rest Snapshot Repository</name>
-      <url>http://flattr4android.com/repositories/flattr-android-sdk/snapshots/</url>
-    </snapshotRepository>
   </distributionManagement>
 
   <reporting>
