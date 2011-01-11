@@ -17,13 +17,16 @@ package com.flattr4android.sdk;
 import com.flattr4android.rest.FlattrRestClient;
 import com.flattr4android.rest.Thing;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -51,14 +54,16 @@ public class FlattrButton extends View {
 	private int buttonTopWidth, buttonTopHeight;
 	private Drawable buttonVMiddle;
 	private int buttonVMiddleWidth, buttonVMiddleHeight;
-	private Drawable buttonBottom;
+	private Drawable buttonBottomFlattr, buttonBottomFlattred,
+			buttonBottomMyThing, buttonBottomInactive;
 	private int buttonBottomWidth, buttonBottomHeight;
 
 	private TextPaint verticalClickPaint;
 	private float verticalClickTextHeight;
 
 	private boolean horizontalResIntialized = false;
-	private Drawable buttonLeft;
+	private Drawable buttonLeftFlattr, buttonLeftFlattred, buttonLeftMyThing,
+			buttonLeftInactive;
 	private int buttonLeftWidth, buttonLeftHeight;
 	private Drawable buttonHMiddle;
 	private int buttonHMiddleWidth, buttonHMiddleHeight;
@@ -72,7 +77,10 @@ public class FlattrButton extends View {
 
 	private FlattrRestClient flattrClient;
 	private String thingId;
-	private Thing thing;
+	private int thingStatus;
+	private int thingClicks;
+	private boolean thingSet = false;
+	private boolean thingGotAsUser;
 	private Exception thingError;
 
 	public FlattrButton(Context context) throws FlattrSDKException {
@@ -186,17 +194,43 @@ public class FlattrButton extends View {
 				verticalResIntialized = false;
 				buttonTop = null;
 				buttonVMiddle = null;
-				buttonBottom = null;
+				buttonBottomFlattr = null;
+				buttonBottomFlattred = null;
+				buttonBottomMyThing = null;
+				buttonBottomInactive = null;
 
 				verticalClickPaint = null;
 			}
 			if (!horizontalResIntialized) {
-				buttonLeft = getResources().getDrawable(
-						FlattrSDK.getResourceId(
-								FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT,
-								"drawable", getContext()));
-				((BitmapDrawable) buttonLeft).setAntiAlias(true);
-				tmp = ((BitmapDrawable) buttonLeft).getBitmap();
+				buttonLeftFlattr = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTR,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonLeftFlattr).setAntiAlias(true);
+				buttonLeftFlattred = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTRED,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonLeftFlattred).setAntiAlias(true);
+				buttonLeftMyThing = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_MYTHING,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonLeftMyThing).setAntiAlias(true);
+				buttonLeftInactive = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_INACTIVE,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonLeftInactive).setAntiAlias(true);
+				tmp = ((BitmapDrawable) buttonLeftFlattr).getBitmap();
 				buttonLeftWidth = tmp.getWidth();
 				buttonLeftHeight = tmp.getHeight();
 
@@ -233,7 +267,10 @@ public class FlattrButton extends View {
 			if (horizontalResIntialized) {
 				// Clear reference to allow garbage collection
 				horizontalResIntialized = false;
-				buttonLeft = null;
+				buttonLeftFlattr = null;
+				buttonLeftFlattred = null;
+				buttonLeftMyThing = null;
+				buttonLeftInactive = null;
 				buttonHMiddle = null;
 				buttonRight = null;
 
@@ -256,11 +293,35 @@ public class FlattrButton extends View {
 				buttonVMiddleWidth = tmp.getWidth();
 				buttonVMiddleHeight = tmp.getHeight();
 
-				buttonBottom = getResources().getDrawable(
-						FlattrSDK.getResourceId(
-								FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM,
-								"drawable", getContext()));
-				tmp = ((BitmapDrawable) buttonBottom).getBitmap();
+				buttonBottomFlattr = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_FLATTR,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonBottomFlattr).setAntiAlias(true);
+				buttonBottomFlattred = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_FLATTRED,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonBottomFlattred).setAntiAlias(true);
+				buttonBottomMyThing = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_MYTHING,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonBottomMyThing).setAntiAlias(true);
+				buttonBottomInactive = getResources()
+						.getDrawable(
+								FlattrSDK
+										.getResourceId(
+												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_INACTIVE,
+												"drawable", getContext()));
+				((BitmapDrawable) buttonBottomInactive).setAntiAlias(true);
+				tmp = ((BitmapDrawable) buttonBottomFlattr).getBitmap();
 				buttonBottomWidth = tmp.getWidth();
 				buttonBottomHeight = tmp.getHeight();
 
@@ -316,13 +377,32 @@ public class FlattrButton extends View {
 					buttonTopHeight + buttonVMiddleHeight);
 			buttonVMiddle.draw(canvas);
 
+			Drawable buttonBottom;
+			switch (getThingStatus()) {
+			case (Thing.INT_STATUS_CLICKED):
+				buttonBottom = buttonBottomFlattred;
+				break;
+			case (Thing.INT_STATUS_INACTIVE):
+				buttonBottom = buttonBottomInactive;
+				break;
+			case (Thing.INT_STATUS_OK):
+				buttonBottom = buttonBottomFlattr;
+				break;
+			case (Thing.INT_STATUS_OWNER):
+				buttonBottom = buttonBottomMyThing;
+				break;
+			default:
+				// Other cases: display a regular button
+				buttonBottom = buttonBottomFlattr;
+				break;
+			}
 			buttonBottom.setBounds(0, buttonTopHeight + buttonVMiddleHeight,
 					buttonBottomWidth, buttonTopHeight + buttonVMiddleHeight
 							+ buttonBottomHeight);
 			buttonBottom.draw(canvas);
 
-			if (thing != null) {
-				drawVerticalClick(canvas, Integer.toString(thing.getClicks()));
+			if (thingSet) {
+				drawVerticalClick(canvas, Integer.toString(thingClicks));
 			} else if (thingError != null) {
 				Log.d(FlattrSDK.LOG_TAG, "Error during thing loading",
 						(Exception) thingError);
@@ -332,6 +412,25 @@ public class FlattrButton extends View {
 				drawVerticalClick(canvas, "?");
 			}
 		} else {
+			Drawable buttonLeft;
+			switch (getThingStatus()) {
+			case (Thing.INT_STATUS_CLICKED):
+				buttonLeft = buttonLeftFlattred;
+				break;
+			case (Thing.INT_STATUS_INACTIVE):
+				buttonLeft = buttonLeftInactive;
+				break;
+			case (Thing.INT_STATUS_OK):
+				buttonLeft = buttonLeftFlattr;
+				break;
+			case (Thing.INT_STATUS_OWNER):
+				buttonLeft = buttonLeftMyThing;
+				break;
+			default:
+				// Other cases: display a regular button
+				buttonLeft = buttonLeftFlattr;
+				break;
+			}
 			buttonLeft.setBounds(0, 0, buttonLeftWidth, buttonLeftHeight);
 			buttonLeft.draw(canvas);
 
@@ -344,14 +443,24 @@ public class FlattrButton extends View {
 					buttonRightHeight);
 			buttonRight.draw(canvas);
 
-			if (thing != null) {
-				drawHorizontalClick(canvas, Integer.toString(thing.getClicks()));
+			if (thingSet) {
+				drawHorizontalClick(canvas, Integer.toString(thingClicks));
 			} else if (thingError != null) {
 				drawHorizontalClick(canvas, "!");
 			} else {
 				// The thing is being loaded
 				drawHorizontalClick(canvas, "?");
 			}
+		}
+	}
+
+	public int getThingStatus() {
+		if (thingSet && thingGotAsUser) {
+			return thingStatus;
+		} else {
+			// As long as we don't know the real status, display a default
+			// button
+			return Thing.INT_STATUS_OK;
 		}
 	}
 
@@ -368,7 +477,7 @@ public class FlattrButton extends View {
 				horizontalClickPaint);
 	}
 
-	class ThingLoader extends AsyncTask<Void, Void, Object> {
+	class ThingLoader extends AsyncTask<Void, Void, Void> {
 
 		private FlattrRestClient flattrClient;
 		private String thingId;
@@ -378,32 +487,57 @@ public class FlattrButton extends View {
 			this.thingId = thingId;
 
 			// Invalidate the current status, if any
-			FlattrButton.this.thing = null;
+			FlattrButton.this.thingSet = false;
 			FlattrButton.this.thingError = null;
 			FlattrButton.this.invalidate();
 		}
 
 		@Override
-		protected Object doInBackground(Void... arg0) {
+		protected Void doInBackground(Void... arg0) {
 			try {
-				return flattrClient.getThing(thingId);
+				// First plan: get the thing through the app
+				try {
+					ContentResolver cr = getContext().getContentResolver();
+					Cursor c = cr.query(
+							Uri.parse(FlattrSDK.FLATTR_PROVIDER_CONTENT_URI
+									+ "thing/id/" + thingId), null, null, null,
+							null);
+					if ((c != null) && (c.moveToFirst())) {
+						FlattrButton.this.thingStatus = c.getInt(c
+								.getColumnIndex("int_status"));
+						FlattrButton.this.thingClicks = c.getInt(c
+								.getColumnIndex("clicks"));
+						// Thing obtained with the user credentials (ie. the
+						// Flattr app)
+						FlattrButton.this.thingGotAsUser = true;
+						FlattrButton.this.thingSet = true;
+					}
+				} catch (Exception e) {
+					FlattrButton.this.thingError = e;
+				}
+
+				// Second plan: get the thing with local means
+				if ((!FlattrButton.this.thingSet)
+						&& (FlattrButton.this.thingError == null)) {
+					Thing thing = flattrClient.getThing(thingId);
+					FlattrButton.this.thingStatus = thing.getIntStatus();
+					FlattrButton.this.thingClicks = thing.getClicks();
+					// Thing obtained with the app credentials
+					FlattrButton.this.thingGotAsUser = false;
+					FlattrButton.this.thingSet = true;
+				}
 			} catch (Exception e) {
 				Log.d(FlattrSDK.LOG_TAG,
 						"Error while loading thing " + thingId, e);
-				return e;
+				FlattrButton.this.thingError = e;
 			}
+
+			return null;
 		}
 
 		@Override
-		protected void onPostExecute(Object result) {
+		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			if (result instanceof Thing) {
-				FlattrButton.this.thing = (Thing) result;
-				FlattrButton.this.thingError = null;
-			} else if (result instanceof Exception) {
-				FlattrButton.this.thing = null;
-				FlattrButton.this.thingError = (Exception) result;
-			}
 			FlattrButton.this.invalidate();
 		}
 	};

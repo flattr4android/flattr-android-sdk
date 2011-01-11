@@ -58,7 +58,7 @@
     <dependency>
     	<groupId>com.flattr4android.rest</groupId>
     	<artifactId>java-flattr-rest</artifactId>
-    	<version>0.0.1.3</version>
+    	<version>0.0.1.4</version>
     	<type>jar</type>
     	<scope>compile</scope>
     </dependency>

@@ -37,6 +37,10 @@ public class FlattrSDK {
 			+ ".DISPLAY_THING";
 	public static final String THING_PARAMETER = "THING_ID";
 
+	public static final String FLATTR_PROVIDER_AUTHORITY = "com.flattr4android.provider.app";
+	public static final String FLATTR_PROVIDER_CONTENT_URI = "content://"
+			+ FLATTR_PROVIDER_AUTHORITY + "/";
+
 	public static final String FLATTR_THING_BASE_URI = "http://flattr.com/thing/";
 	public static final String FLATTR_SDK_XML_NAMESPACE = "http://schemas.flattr4android.com/sdk";
 
@@ -44,8 +48,14 @@ public class FlattrSDK {
 
 	public static final String RESOURCE_PREFIX = "flattr_sdk_";
 
-	public static final String RESOURCE_BUTTON_HORIZONTAL_LEFT = RESOURCE_PREFIX
-			+ "button_horizontal_left";
+	public static final String RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTR = RESOURCE_PREFIX
+			+ "button_horizontal_left_flattr";
+	public static final String RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTRED = RESOURCE_PREFIX
+			+ "button_horizontal_left_flattred";
+	public static final String RESOURCE_BUTTON_HORIZONTAL_LEFT_MYTHING = RESOURCE_PREFIX
+			+ "button_horizontal_left_mything";
+	public static final String RESOURCE_BUTTON_HORIZONTAL_LEFT_INACTIVE = RESOURCE_PREFIX
+			+ "button_horizontal_left_inactive";
 	public static final String RESOURCE_BUTTON_HORIZONTAL_MIDDLE = RESOURCE_PREFIX
 			+ "button_horizontal_middle";
 	public static final String RESOURCE_BUTTON_HORIZONTAL_RIGHT = RESOURCE_PREFIX
@@ -54,8 +64,14 @@ public class FlattrSDK {
 			+ "button_vertical_top";
 	public static final String RESOURCE_BUTTON_VERTICAL_MIDDLE = RESOURCE_PREFIX
 			+ "button_vertical_middle";
-	public static final String RESOURCE_BUTTON_VERTICAL_BOTTOM = RESOURCE_PREFIX
-			+ "button_vertical_bottom";
+	public static final String RESOURCE_BUTTON_VERTICAL_BOTTOM_FLATTR = RESOURCE_PREFIX
+			+ "button_vertical_bottom_flattr";
+	public static final String RESOURCE_BUTTON_VERTICAL_BOTTOM_FLATTRED = RESOURCE_PREFIX
+			+ "button_vertical_bottom_flattred";
+	public static final String RESOURCE_BUTTON_VERTICAL_BOTTOM_MYTHING = RESOURCE_PREFIX
+			+ "button_vertical_bottom_mything";
+	public static final String RESOURCE_BUTTON_VERTICAL_BOTTOM_INACTIVE = RESOURCE_PREFIX
+			+ "button_vertical_bottom_inactive";
 
 	/**
 	 * Present a Flattr thing to the user. This method tries to: - Invoke the
@@ -125,8 +141,8 @@ public class FlattrSDK {
 	}
 
 	/**
-	 * Return a string got from the XML resources (string.xml). If the string is not found, 
-	 * the default value is returned.
+	 * Return a string got from the XML resources (string.xml). If the string is
+	 * not found, the default value is returned.
 	 */
 	public static String getString(String resId, String defaultValue,
 			Context context) {
