@@ -494,32 +494,40 @@ public class FlattrButton extends View {
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
+			// First plan: get the thing through the app
 			try {
-				// First plan: get the thing through the app
-				try {
-					ContentResolver cr = getContext().getContentResolver();
-					Cursor c = cr.query(
-							Uri.parse(FlattrSDK.FLATTR_PROVIDER_CONTENT_URI
-									+ "thing/id/" + thingId), null, null, null,
-							null);
-					if ((c != null) && (c.moveToFirst())) {
-						FlattrButton.this.thingStatus = c.getInt(c
-								.getColumnIndex("int_status"));
-						FlattrButton.this.thingClicks = c.getInt(c
-								.getColumnIndex("clicks"));
-						// Thing obtained with the user credentials (ie. the
-						// Flattr app)
-						FlattrButton.this.thingGotAsUser = true;
-						FlattrButton.this.thingSet = true;
-					}
-				} catch (Exception e) {
-					FlattrButton.this.thingError = e;
+				ContentResolver cr = getContext().getContentResolver();
+				Cursor c = cr.query(
+						Uri.parse(FlattrSDK.FLATTR_PROVIDER_CONTENT_URI
+								+ "thing/id/" + thingId), null, null, null,
+						null);
+				if ((c != null) && (c.moveToFirst())) {
+					Log.d(FlattrSDK.LOG_TAG, "Thing " + thingId
+							+ " got from Flattr application");
+					FlattrButton.this.thingStatus = c.getInt(c
+							.getColumnIndex("int_status"));
+					FlattrButton.this.thingClicks = c.getInt(c
+							.getColumnIndex("clicks"));
+					// Thing obtained with the user credentials (ie. the
+					// Flattr app)
+					FlattrButton.this.thingGotAsUser = true;
+					FlattrButton.this.thingSet = true;
+					return null;
 				}
+			} catch (Exception e) {
+				Log.d(FlattrSDK.LOG_TAG, "Error while trying to get thing "
+						+ thingId + " from Flattr application", e);
+				FlattrButton.this.thingError = e;
+			}
 
-				// Second plan: get the thing with local means
-				if ((!FlattrButton.this.thingSet)
-						&& (FlattrButton.this.thingError == null)) {
+			// Second plan: get the thing with local means
+			try {
+				if (!FlattrButton.this.thingSet) {
 					Thing thing = flattrClient.getThing(thingId);
+
+					Log.d(FlattrSDK.LOG_TAG, "Thing " + thingId
+							+ " got with local means");
+
 					FlattrButton.this.thingStatus = thing.getIntStatus();
 					FlattrButton.this.thingClicks = thing.getClicks();
 					// Thing obtained with the app credentials
@@ -527,8 +535,8 @@ public class FlattrButton extends View {
 					FlattrButton.this.thingSet = true;
 				}
 			} catch (Exception e) {
-				Log.d(FlattrSDK.LOG_TAG,
-						"Error while loading thing " + thingId, e);
+				Log.d(FlattrSDK.LOG_TAG, "Error while loading thing " + thingId
+						+ " with local means", e);
 				FlattrButton.this.thingError = e;
 			}
 
