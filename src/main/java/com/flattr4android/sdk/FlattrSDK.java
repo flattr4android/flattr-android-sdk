@@ -180,4 +180,21 @@ public class FlattrSDK {
 		return id;
 	}
 
+	/**
+	 * Get an attribute raw value (eg. <code>"Hello"</code> or
+	 * <code>"@string/hello"</code>) and resolve its reference, if necessary.
+	 * 
+	 * @param valueOrRef
+	 *            <code>"Hello"</code> or <code>"@string/hello"</code>
+	 * @return <code>"Hello"</code> in both cases
+	 */
+	public static String resolveStringRef(String valueOrRef, Context context) {
+		// If the string starts with an "@", this is not a value but a reference
+		if (valueOrRef.startsWith("@")) {
+			int resId = FlattrSDK.getResourceId(valueOrRef, "string", context);
+			valueOrRef = context.getString(resId);
+		}
+		return valueOrRef;
+	}
+
 }

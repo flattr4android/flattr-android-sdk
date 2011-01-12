@@ -170,7 +170,8 @@ public class FlattrButton extends View {
 
 	private String getAttribute(AttributeSet attrs, String attrName)
 			throws FlattrSDKException {
-		return getAttribute(attrs, attrName, true);
+		return FlattrSDK.resolveStringRef(getAttribute(attrs, attrName, true),
+				getContext());
 	}
 
 	private String getAttribute(AttributeSet attrs, String attrName,
