@@ -32,6 +32,10 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 
 /**
  * A <code>FlattrButton</code> represents a Flattr button. It embeds all the
@@ -79,7 +83,7 @@ public class FlattrButton extends View {
 	private String thingId;
 	private int thingStatus;
 	private int thingClicks;
-	private boolean thingSet = false;
+	private boolean thingSet = false, thingStatusKnown = false;
 	private boolean thingGotAsUser;
 	private Exception thingError;
 
@@ -402,9 +406,9 @@ public class FlattrButton extends View {
 							+ buttonBottomHeight);
 			buttonBottom.draw(canvas);
 
-			if (thingSet) {
+			if (thingStatusKnown && thingSet) {
 				drawVerticalClick(canvas, Integer.toString(thingClicks));
-			} else if (thingError != null) {
+			} else if (thingStatusKnown && (thingError != null)) {
 				Log.d(FlattrSDK.LOG_TAG, "Error during thing loading",
 						(Exception) thingError);
 				drawVerticalClick(canvas, "!");
@@ -444,9 +448,9 @@ public class FlattrButton extends View {
 					buttonRightHeight);
 			buttonRight.draw(canvas);
 
-			if (thingSet) {
+			if (thingStatusKnown && thingSet) {
 				drawHorizontalClick(canvas, Integer.toString(thingClicks));
-			} else if (thingError != null) {
+			} else if (thingStatusKnown && (thingError != null)) {
 				drawHorizontalClick(canvas, "!");
 			} else {
 				// The thing is being loaded
@@ -456,7 +460,7 @@ public class FlattrButton extends View {
 	}
 
 	public int getThingStatus() {
-		if (thingSet && thingGotAsUser) {
+		if (thingStatusKnown && thingSet && thingGotAsUser) {
 			return thingStatus;
 		} else {
 			// As long as we don't know the real status, display a default
@@ -490,7 +494,6 @@ public class FlattrButton extends View {
 			// Invalidate the current status, if any
 			FlattrButton.this.thingSet = false;
 			FlattrButton.this.thingError = null;
-			FlattrButton.this.invalidate();
 		}
 
 		@Override
@@ -547,7 +550,42 @@ public class FlattrButton extends View {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			FlattrButton.this.invalidate();
+			AlphaAnimation disappear = new AlphaAnimation(1, 0);
+			ScaleAnimation reduce = new ScaleAnimation(1, 0.9f, 1, 0.9f,
+					FlattrButton.this.getWidth() / 2,
+					FlattrButton.this.getHeight() / 2);
+			AnimationSet firstAnim = new AnimationSet(false);
+			firstAnim.addAnimation(disappear);
+			firstAnim.addAnimation(reduce);
+			firstAnim.setDuration(200);
+			firstAnim.setAnimationListener(new Animation.AnimationListener() {
+
+				public void onAnimationStart(Animation animation) {
+					// Nothing to do
+				}
+
+				public void onAnimationRepeat(Animation animation) {
+					// Nothing to do
+				}
+
+				public void onAnimationEnd(Animation animation) {
+					// Mark thing as "known" for it to be displayed
+					thingStatusKnown = true;
+
+					// Update view, start "Show again" animation
+					FlattrButton.this.invalidate();
+					AlphaAnimation appear = new AlphaAnimation(0, 1);
+					ScaleAnimation zoom = new ScaleAnimation(0.9f, 1, 0.9f, 1,
+							FlattrButton.this.getWidth() / 2, FlattrButton.this
+									.getHeight() / 2);
+					AnimationSet secondAnim = new AnimationSet(false);
+					secondAnim.addAnimation(appear);
+					secondAnim.addAnimation(zoom);
+					secondAnim.setDuration(200);
+					FlattrButton.this.startAnimation(secondAnim);
+				}
+			});
+			startAnimation(firstAnim);
 		}
 	};
 
