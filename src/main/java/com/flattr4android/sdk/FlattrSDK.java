@@ -72,6 +72,18 @@ public class FlattrSDK {
 			+ "button_vertical_bottom_mything";
 	public static final String RESOURCE_BUTTON_VERTICAL_BOTTOM_INACTIVE = RESOURCE_PREFIX
 			+ "button_vertical_bottom_inactive";
+	public static final String RESOURCE_BUTTON_MINI_LEFT_FLATTR = RESOURCE_PREFIX
+			+ "button_mini_left_flattr";
+	public static final String RESOURCE_BUTTON_MINI_LEFT_FLATTRED = RESOURCE_PREFIX
+			+ "button_mini_left_flattred";
+	public static final String RESOURCE_BUTTON_MINI_LEFT_MYTHING = RESOURCE_PREFIX
+			+ "button_mini_left_mything";
+	public static final String RESOURCE_BUTTON_MINI_LEFT_INACTIVE = RESOURCE_PREFIX
+			+ "button_mini_left_inactive";
+	public static final String RESOURCE_BUTTON_MINI_MIDDLE = RESOURCE_PREFIX
+			+ "button_mini_middle";
+	public static final String RESOURCE_BUTTON_MINI_RIGHT = RESOURCE_PREFIX
+			+ "button_mini_right";
 
 	/**
 	 * Present a Flattr thing to the user. This method tries to: - Invoke the

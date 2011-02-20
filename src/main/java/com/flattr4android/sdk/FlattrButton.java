@@ -50,6 +50,7 @@ public class FlattrButton extends View {
 
 	public static final String BUTTON_STYLE_VERTICAL = "vertical";
 	public static final String BUTTON_STYLE_HORIZONTAL = "horizontal";
+	public static final String BUTTON_STYLE_MINI = "mini";
 
 	public static final int CLICK_TEXT_COLOR = 0xff000000;
 
@@ -155,13 +156,16 @@ public class FlattrButton extends View {
 	/**
 	 * @see FlattrButton#BUTTON_STYLE_HORIZONTAL
 	 * @see FlattrButton#BUTTON_STYLE_VERTICAL
+	 * @see FlattrButton#BUTTON_STYLE_MINI
 	 */
 	public void setButtonStyle(String style) throws FlattrSDKException {
 		if ((!style.equals(BUTTON_STYLE_HORIZONTAL))
-				&& (!style.equals(BUTTON_STYLE_VERTICAL))) {
+				&& (!style.equals(BUTTON_STYLE_VERTICAL))
+				&& !(style.equals(BUTTON_STYLE_MINI))) {
 			throw new IllegalArgumentException("Invalid style '" + style
-					+ "' (only " + BUTTON_STYLE_HORIZONTAL + " and "
-					+ BUTTON_STYLE_VERTICAL + " are allowed)");
+					+ "' (only " + BUTTON_STYLE_HORIZONTAL + ", "
+					+ BUTTON_STYLE_VERTICAL + " and " + BUTTON_STYLE_MINI
+					+ " are allowed)");
 		}
 		this.style = style;
 		initResources();
@@ -193,7 +197,8 @@ public class FlattrButton extends View {
 	private void initResources() throws FlattrSDKException {
 		Bitmap tmp;
 
-		if (style.equals(BUTTON_STYLE_HORIZONTAL)) {
+		if ((style.equals(BUTTON_STYLE_HORIZONTAL))
+				|| style.equals(BUTTON_STYLE_MINI)) {
 			if (verticalResIntialized) {
 				// Clear reference to allow garbage collection
 				verticalResIntialized = false;
@@ -207,32 +212,53 @@ public class FlattrButton extends View {
 				verticalClickPaint = null;
 			}
 			if (!horizontalResIntialized) {
+				String[] ressourceNames;
+				if (style.equals(BUTTON_STYLE_HORIZONTAL)) {
+					ressourceNames = new String[] {
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTR,
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTRED,
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_MYTHING,
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_INACTIVE,
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_MIDDLE,
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_RIGHT
+					};
+				} else {
+					ressourceNames = new String[] {
+							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_FLATTR,
+							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_FLATTRED,
+							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_MYTHING,
+							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_INACTIVE,
+							FlattrSDK.RESOURCE_BUTTON_MINI_MIDDLE,
+							FlattrSDK.RESOURCE_BUTTON_MINI_RIGHT
+
+					};
+				}
 				buttonLeftFlattr = getResources()
 						.getDrawable(
 								FlattrSDK
 										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTR,
+												ressourceNames[0],
 												"drawable", getContext()));
 				((BitmapDrawable) buttonLeftFlattr).setAntiAlias(true);
 				buttonLeftFlattred = getResources()
 						.getDrawable(
 								FlattrSDK
 										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTRED,
+												ressourceNames[1],
 												"drawable", getContext()));
 				((BitmapDrawable) buttonLeftFlattred).setAntiAlias(true);
 				buttonLeftMyThing = getResources()
 						.getDrawable(
 								FlattrSDK
 										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_MYTHING,
+												ressourceNames[2],
 												"drawable", getContext()));
 				((BitmapDrawable) buttonLeftMyThing).setAntiAlias(true);
 				buttonLeftInactive = getResources()
 						.getDrawable(
 								FlattrSDK
 										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_INACTIVE,
+												ressourceNames[3],
 												"drawable", getContext()));
 				((BitmapDrawable) buttonLeftInactive).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonLeftFlattr).getBitmap();
@@ -241,7 +267,7 @@ public class FlattrButton extends View {
 
 				buttonHMiddle = getResources().getDrawable(
 						FlattrSDK.getResourceId(
-								FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_MIDDLE,
+								ressourceNames[4],
 								"drawable", getContext()));
 				((BitmapDrawable) buttonHMiddle).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonHMiddle).getBitmap();
@@ -250,7 +276,7 @@ public class FlattrButton extends View {
 
 				buttonRight = getResources().getDrawable(
 						FlattrSDK.getResourceId(
-								FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_RIGHT,
+								ressourceNames[5],
 								"drawable", getContext()));
 				((BitmapDrawable) buttonRight).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonRight).getBitmap();
