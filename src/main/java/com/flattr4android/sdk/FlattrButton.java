@@ -84,7 +84,7 @@ public class FlattrButton extends View {
 	private String thingId;
 	private int thingStatus;
 	private int thingClicks;
-	private boolean thingSet = false, thingStatusKnown = false;
+	private boolean loading = false, thingSet = false, thingStatusKnown = false;
 	private boolean thingGotAsUser;
 	private Exception thingError;
 
@@ -98,10 +98,10 @@ public class FlattrButton extends View {
 			throws FlattrSDKException {
 		super(context, attrs);
 
-		setThingId(getAttribute(attrs, "thing_id"));
+		setThingId(getAttribute(attrs, "thing_id", false));
 
-		setFlattrCredentials(getAttribute(attrs, "token"),
-				getAttribute(attrs, "token_secret"));
+		setFlattrCredentials(getAttribute(attrs, "token", false),
+				getAttribute(attrs, "token_secret", false));
 
 		String style = getAttribute(attrs, "button_style", false);
 		if (style != null) {
@@ -129,11 +129,12 @@ public class FlattrButton extends View {
 	 * Set Oauth credentials, got from <a
 	 * href="http://flattr4android.com/sdk/">Flattr4Android.com</a>.
 	 */
-	public void setFlattrCredentials(String token, String tokenSecret) {
+	public synchronized void setFlattrCredentials(String token, String tokenSecret) {
 		flattrClient = new FlattrRestClient(FlattrSDK.CONSUMER_KEY,
 				FlattrSDK.CONSUMER_SECRET, token, tokenSecret);
-		if (thingId != null) {
-			new ThingLoader(flattrClient, thingId).execute();
+		if ((thingId != null) && (!loading)) {
+			loading = true;
+			new ThingLoader(this, flattrClient, thingId).execute();
 		}
 	}
 
@@ -142,11 +143,21 @@ public class FlattrButton extends View {
 	 * href="http://flattr4android.com/sdk/">Flattr4Android.com</a> or the
 	 * Flattr Rest API.
 	 */
-	public void setThingId(String thingId) {
+	public synchronized void setThingId(String thingId) {
 		this.thingId = thingId;
-		if (flattrClient != null) {
-			new ThingLoader(flattrClient, thingId).execute();
+		if ((flattrClient != null) && (thingId != null) && (!loading)) {
+			loading = true;
+			new ThingLoader(this, flattrClient, thingId).execute();
 		}
+	}
+
+	public void initWithThing(Thing thing, boolean thingGotAsUser) {
+		this.thingId = thing.getId();
+		this.thingStatus = thing.getIntStatus();
+		this.thingClicks = thing.getClicks();
+		this.thingGotAsUser = thingGotAsUser;
+		this.thingStatusKnown = true;
+		this.thingSet = true;
 	}
 
 	public String getThingId() {
@@ -220,8 +231,7 @@ public class FlattrButton extends View {
 							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_MYTHING,
 							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_INACTIVE,
 							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_MIDDLE,
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_RIGHT
-					};
+							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_RIGHT };
 				} else {
 					ressourceNames = new String[] {
 							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_FLATTR,
@@ -233,51 +243,37 @@ public class FlattrButton extends View {
 
 					};
 				}
-				buttonLeftFlattr = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												ressourceNames[0],
-												"drawable", getContext()));
+				buttonLeftFlattr = getResources().getDrawable(
+						FlattrSDK.getResourceId(ressourceNames[0], "drawable",
+								getContext()));
 				((BitmapDrawable) buttonLeftFlattr).setAntiAlias(true);
-				buttonLeftFlattred = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												ressourceNames[1],
-												"drawable", getContext()));
+				buttonLeftFlattred = getResources().getDrawable(
+						FlattrSDK.getResourceId(ressourceNames[1], "drawable",
+								getContext()));
 				((BitmapDrawable) buttonLeftFlattred).setAntiAlias(true);
-				buttonLeftMyThing = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												ressourceNames[2],
-												"drawable", getContext()));
+				buttonLeftMyThing = getResources().getDrawable(
+						FlattrSDK.getResourceId(ressourceNames[2], "drawable",
+								getContext()));
 				((BitmapDrawable) buttonLeftMyThing).setAntiAlias(true);
-				buttonLeftInactive = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												ressourceNames[3],
-												"drawable", getContext()));
+				buttonLeftInactive = getResources().getDrawable(
+						FlattrSDK.getResourceId(ressourceNames[3], "drawable",
+								getContext()));
 				((BitmapDrawable) buttonLeftInactive).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonLeftFlattr).getBitmap();
 				buttonLeftWidth = tmp.getWidth();
 				buttonLeftHeight = tmp.getHeight();
 
 				buttonHMiddle = getResources().getDrawable(
-						FlattrSDK.getResourceId(
-								ressourceNames[4],
-								"drawable", getContext()));
+						FlattrSDK.getResourceId(ressourceNames[4], "drawable",
+								getContext()));
 				((BitmapDrawable) buttonHMiddle).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonHMiddle).getBitmap();
 				buttonHMiddleWidth = tmp.getWidth();
 				buttonHMiddleHeight = tmp.getHeight();
 
 				buttonRight = getResources().getDrawable(
-						FlattrSDK.getResourceId(
-								ressourceNames[5],
-								"drawable", getContext()));
+						FlattrSDK.getResourceId(ressourceNames[5], "drawable",
+								getContext()));
 				((BitmapDrawable) buttonRight).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonRight).getBitmap();
 				buttonRightWidth = tmp.getWidth();
@@ -510,16 +506,19 @@ public class FlattrButton extends View {
 
 	class ThingLoader extends AsyncTask<Void, Void, Void> {
 
+		private FlattrButton button;
 		private FlattrRestClient flattrClient;
 		private String thingId;
 
-		public ThingLoader(FlattrRestClient flattrClient, String thingId) {
+		public ThingLoader(FlattrButton button, FlattrRestClient flattrClient,
+				String thingId) {
+			this.button = button;
 			this.flattrClient = flattrClient;
 			this.thingId = thingId;
 
 			// Invalidate the current status, if any
-			FlattrButton.this.thingSet = false;
-			FlattrButton.this.thingError = null;
+			button.thingSet = false;
+			button.thingError = null;
 		}
 
 		@Override
@@ -534,40 +533,39 @@ public class FlattrButton extends View {
 				if ((c != null) && (c.moveToFirst())) {
 					Log.d(FlattrSDK.LOG_TAG, "Thing " + thingId
 							+ " got from Flattr application");
-					FlattrButton.this.thingStatus = c.getInt(c
+					button.thingStatus = c.getInt(c
 							.getColumnIndex("int_status"));
-					FlattrButton.this.thingClicks = c.getInt(c
-							.getColumnIndex("clicks"));
+					button.thingClicks = c.getInt(c.getColumnIndex("clicks"));
 					// Thing obtained with the user credentials (ie. the
 					// Flattr app)
-					FlattrButton.this.thingGotAsUser = true;
-					FlattrButton.this.thingSet = true;
+					button.thingGotAsUser = true;
+					button.thingSet = true;
 					return null;
 				}
 			} catch (Exception e) {
 				Log.d(FlattrSDK.LOG_TAG, "Error while trying to get thing "
 						+ thingId + " from Flattr application", e);
-				FlattrButton.this.thingError = e;
+				button.thingError = e;
 			}
 
 			// Second plan: get the thing with local means
 			try {
-				if (!FlattrButton.this.thingSet) {
+				if (!button.thingSet) {
 					Thing thing = flattrClient.getThing(thingId);
 
 					Log.d(FlattrSDK.LOG_TAG, "Thing " + thingId
 							+ " got with local means");
 
-					FlattrButton.this.thingStatus = thing.getIntStatus();
-					FlattrButton.this.thingClicks = thing.getClicks();
+					button.thingStatus = thing.getIntStatus();
+					button.thingClicks = thing.getClicks();
 					// Thing obtained with the app credentials
-					FlattrButton.this.thingGotAsUser = false;
-					FlattrButton.this.thingSet = true;
+					button.thingGotAsUser = false;
+					button.thingSet = true;
 				}
 			} catch (Exception e) {
 				Log.d(FlattrSDK.LOG_TAG, "Error while loading thing " + thingId
 						+ " with local means", e);
-				FlattrButton.this.thingError = e;
+				button.thingError = e;
 			}
 
 			return null;
@@ -578,8 +576,7 @@ public class FlattrButton extends View {
 			super.onPostExecute(result);
 			AlphaAnimation disappear = new AlphaAnimation(1, 0);
 			ScaleAnimation reduce = new ScaleAnimation(1, 0.9f, 1, 0.9f,
-					FlattrButton.this.getWidth() / 2,
-					FlattrButton.this.getHeight() / 2);
+					button.getWidth() / 2, button.getHeight() / 2);
 			AnimationSet firstAnim = new AnimationSet(false);
 			firstAnim.addAnimation(disappear);
 			firstAnim.addAnimation(reduce);
@@ -599,16 +596,15 @@ public class FlattrButton extends View {
 					thingStatusKnown = true;
 
 					// Update view, start "Show again" animation
-					FlattrButton.this.invalidate();
+					button.invalidate();
 					AlphaAnimation appear = new AlphaAnimation(0, 1);
 					ScaleAnimation zoom = new ScaleAnimation(0.9f, 1, 0.9f, 1,
-							FlattrButton.this.getWidth() / 2, FlattrButton.this
-									.getHeight() / 2);
+							button.getWidth() / 2, button.getHeight() / 2);
 					AnimationSet secondAnim = new AnimationSet(false);
 					secondAnim.addAnimation(appear);
 					secondAnim.addAnimation(zoom);
 					secondAnim.setDuration(200);
-					FlattrButton.this.startAnimation(secondAnim);
+					button.startAnimation(secondAnim);
 				}
 			});
 			startAnimation(firstAnim);
