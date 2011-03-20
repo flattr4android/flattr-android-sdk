@@ -139,12 +139,29 @@ public class FlattrButton extends View {
 	}
 
 	/**
+	 * Set REST client.
+	 */
+	public synchronized void setFlattrRestClient(FlattrRestClient client) {
+		flattrClient = client;
+		if ((thingId != null) && (!loading)) {
+			loading = true;
+			new ThingLoader(this, flattrClient, thingId).execute();
+		}
+	}
+
+	/**
 	 * Set targeted thing Id, got from <a
 	 * href="http://flattr4android.com/sdk/">Flattr4Android.com</a> or the
 	 * Flattr Rest API.
 	 */
 	public synchronized void setThingId(String thingId) {
 		this.thingId = thingId;
+		if (flattrClient != null) {
+			Thing cachedThing = flattrClient.getCachedThingById(thingId);
+			if (cachedThing != null) {
+				initWithThing(cachedThing, true);
+			}
+		}
 		if ((flattrClient != null) && (thingId != null) && (!loading)) {
 			loading = true;
 			new ThingLoader(this, flattrClient, thingId).execute();
@@ -158,6 +175,7 @@ public class FlattrButton extends View {
 		this.thingGotAsUser = thingGotAsUser;
 		this.thingStatusKnown = true;
 		this.thingSet = true;
+		this.loading = true;
 	}
 
 	public String getThingId() {
