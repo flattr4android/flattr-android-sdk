@@ -84,7 +84,8 @@ public class FlattrButton extends View {
 	private String thingId;
 	private int thingStatus;
 	private int thingClicks;
-	private boolean loading = false, thingSet = false, thingStatusKnown = false;
+	private boolean loading = false, thingSet = false,
+			thingStatusKnown = false;
 	private boolean thingGotAsUser;
 	private Exception thingError;
 
@@ -129,7 +130,8 @@ public class FlattrButton extends View {
 	 * Set Oauth credentials, got from <a
 	 * href="http://flattr4android.com/sdk/">Flattr4Android.com</a>.
 	 */
-	public synchronized void setFlattrCredentials(String token, String tokenSecret) {
+	public synchronized void setFlattrCredentials(String token,
+			String tokenSecret) {
 		flattrClient = new FlattrRestClient(FlattrSDK.CONSUMER_KEY,
 				FlattrSDK.CONSUMER_SECRET, token, tokenSecret);
 		if ((thingId != null) && (!loading)) {
@@ -449,7 +451,8 @@ public class FlattrButton extends View {
 			if (thingStatusKnown && thingSet) {
 				drawVerticalClick(canvas, Integer.toString(thingClicks));
 			} else if (thingStatusKnown && (thingError != null)) {
-				Log.d(FlattrSDK.LOG_TAG, "Error during thing loading",
+				Log.d(FlattrSDK.LOG_TAG,
+						"Error while loading thing " + thingId,
 						(Exception) thingError);
 				drawVerticalClick(canvas, "!");
 			} else {
