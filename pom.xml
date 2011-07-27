@@ -3,7 +3,7 @@
   <groupId>com.flattr4android.sdk</groupId>
   <artifactId>flattr-android-sdk</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.1.7</version>
+  <version>0.0.2.0</version>
   <name>flattr-android-sdk</name>
   <description>Simple Flattr integration for Android</description>
   <url>http://github.com/flattr4android/flattr-android-sdk</url>
@@ -58,7 +58,7 @@
     <dependency>
     	<groupId>com.flattr4android.rest</groupId>
     	<artifactId>java-flattr-rest</artifactId>
-    	<version>0.0.2.4</version>
+    	<version>0.0.3.0</version>
     	<type>jar</type>
     	<scope>compile</scope>
     </dependency>
