@@ -70,8 +70,6 @@ public class FlattrButton extends View {
 	private Drawable buttonLeftFlattr, buttonLeftFlattred, buttonLeftMyThing,
 			buttonLeftInactive;
 	private int buttonLeftWidth, buttonLeftHeight;
-	private Drawable buttonHMiddle;
-	private int buttonHMiddleWidth, buttonHMiddleHeight;
 	private Drawable buttonRight;
 	private int buttonRightWidth, buttonRightHeight;
 
@@ -283,14 +281,6 @@ public class FlattrButton extends View {
 				buttonLeftWidth = tmp.getWidth();
 				buttonLeftHeight = tmp.getHeight();
 
-				buttonHMiddle = getResources().getDrawable(
-						FlattrSDK.getResourceId(ressourceNames[4], "drawable",
-								getContext()));
-				((BitmapDrawable) buttonHMiddle).setAntiAlias(true);
-				tmp = ((BitmapDrawable) buttonHMiddle).getBitmap();
-				buttonHMiddleWidth = tmp.getWidth();
-				buttonHMiddleHeight = tmp.getHeight();
-
 				buttonRight = getResources().getDrawable(
 						FlattrSDK.getResourceId(ressourceNames[5], "drawable",
 								getContext()));
@@ -318,7 +308,6 @@ public class FlattrButton extends View {
 				buttonLeftFlattred = null;
 				buttonLeftMyThing = null;
 				buttonLeftInactive = null;
-				buttonHMiddle = null;
 				buttonRight = null;
 
 				horizontalClickPaint = null;
@@ -403,8 +392,7 @@ public class FlattrButton extends View {
 				measuredHeight = buttonTopHeight + buttonVMiddleHeight
 						+ buttonBottomHeight;
 			} else {
-				measuredWidth = buttonLeftWidth + buttonHMiddleWidth
-						+ buttonRightWidth;
+				measuredWidth = buttonLeftWidth + buttonRightWidth;
 				measuredHeight = buttonLeftHeight;
 			}
 			break;
@@ -482,12 +470,8 @@ public class FlattrButton extends View {
 			buttonLeft.setBounds(0, 0, buttonLeftWidth, buttonLeftHeight);
 			buttonLeft.draw(canvas);
 
-			buttonHMiddle.setBounds(buttonLeftWidth, 0, buttonLeftWidth
-					+ buttonHMiddleWidth, buttonHMiddleHeight);
-			buttonHMiddle.draw(canvas);
-
-			buttonRight.setBounds(buttonLeftWidth + buttonHMiddleWidth, 0,
-					buttonLeftWidth + buttonHMiddleWidth + buttonRightWidth,
+			buttonRight.setBounds(buttonLeftWidth, 0,
+					buttonLeftWidth + buttonRightWidth,
 					buttonRightHeight);
 			buttonRight.draw(canvas);
 
@@ -519,8 +503,7 @@ public class FlattrButton extends View {
 	}
 
 	private void drawHorizontalClick(Canvas canvas, String text) {
-		canvas.drawText(text, buttonLeftWidth + buttonHMiddleWidth
-				+ (buttonRightWidth / 2f),
+		canvas.drawText(text, buttonLeftWidth + (buttonRightWidth / 2f),
 				(buttonRightHeight - horizontalClickTextHeight) / 2f,
 				horizontalClickPaint);
 	}
