@@ -503,8 +503,10 @@ public class FlattrButton extends View {
 	}
 
 	private void drawHorizontalClick(Canvas canvas, String text) {
+		// In the formula, the 0.92 factor is there to take the drop shadow (at
+		// the bottom of the button) into account
 		canvas.drawText(text, buttonLeftWidth + (buttonRightWidth / 2f),
-				(buttonRightHeight - horizontalClickTextHeight) / 2f,
+				((buttonRightHeight * 0.92f) - horizontalClickTextHeight) / 2f,
 				horizontalClickPaint);
 	}
 
