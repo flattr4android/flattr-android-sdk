@@ -199,12 +199,6 @@ public class FlattrButton extends View {
 		return style;
 	}
 
-	private String getAttribute(AttributeSet attrs, String attrName)
-			throws FlattrSDKException {
-		return FlattrSDK.resolveStringRef(getAttribute(attrs, attrName, true),
-				getContext());
-	}
-
 	private String getAttribute(AttributeSet attrs, String attrName,
 			boolean mandatory) throws FlattrSDKException {
 		String value = attrs.getAttributeValue(
@@ -235,49 +229,37 @@ public class FlattrButton extends View {
 				verticalClickPaint = null;
 			}
 			if (!horizontalResIntialized) {
-				String[] ressourceNames;
+				int[] resourceIds;
 				if (style.equals(BUTTON_STYLE_HORIZONTAL)) {
-					ressourceNames = new String[] {
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTR,
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_FLATTRED,
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_MYTHING,
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_LEFT_INACTIVE,
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_MIDDLE,
-							FlattrSDK.RESOURCE_BUTTON_HORIZONTAL_RIGHT };
+					resourceIds = new int[] {
+							R.drawable.button_horizontal_left_flattr,
+							R.drawable.button_horizontal_left_flattred,
+							R.drawable.button_horizontal_left_mything,
+							R.drawable.button_horizontal_left_inactive,
+							R.drawable.button_horizontal_right };
 				} else {
-					ressourceNames = new String[] {
-							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_FLATTR,
-							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_FLATTRED,
-							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_MYTHING,
-							FlattrSDK.RESOURCE_BUTTON_MINI_LEFT_INACTIVE,
-							FlattrSDK.RESOURCE_BUTTON_MINI_MIDDLE,
-							FlattrSDK.RESOURCE_BUTTON_MINI_RIGHT
+					resourceIds = new int[] {
+							R.drawable.button_mini_left_flattr,
+							R.drawable.button_mini_left_flattred,
+							R.drawable.button_mini_left_mything,
+							R.drawable.button_mini_left_inactive,
+							R.drawable.button_mini_right
 
 					};
 				}
-				buttonLeftFlattr = getResources().getDrawable(
-						FlattrSDK.getResourceId(ressourceNames[0], "drawable",
-								getContext()));
+				buttonLeftFlattr = getResources().getDrawable(resourceIds[0]);
 				((BitmapDrawable) buttonLeftFlattr).setAntiAlias(true);
-				buttonLeftFlattred = getResources().getDrawable(
-						FlattrSDK.getResourceId(ressourceNames[1], "drawable",
-								getContext()));
+				buttonLeftFlattred = getResources().getDrawable(resourceIds[1]);
 				((BitmapDrawable) buttonLeftFlattred).setAntiAlias(true);
-				buttonLeftMyThing = getResources().getDrawable(
-						FlattrSDK.getResourceId(ressourceNames[2], "drawable",
-								getContext()));
+				buttonLeftMyThing = getResources().getDrawable(resourceIds[2]);
 				((BitmapDrawable) buttonLeftMyThing).setAntiAlias(true);
-				buttonLeftInactive = getResources().getDrawable(
-						FlattrSDK.getResourceId(ressourceNames[3], "drawable",
-								getContext()));
+				buttonLeftInactive = getResources().getDrawable(resourceIds[3]);
 				((BitmapDrawable) buttonLeftInactive).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonLeftFlattr).getBitmap();
 				buttonLeftWidth = tmp.getWidth();
 				buttonLeftHeight = tmp.getHeight();
 
-				buttonRight = getResources().getDrawable(
-						FlattrSDK.getResourceId(ressourceNames[5], "drawable",
-								getContext()));
+				buttonRight = getResources().getDrawable(resourceIds[4]);
 				((BitmapDrawable) buttonRight).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonRight).getBitmap();
 				buttonRightWidth = tmp.getWidth();
@@ -307,49 +289,27 @@ public class FlattrButton extends View {
 				horizontalClickPaint = null;
 			}
 			if (!verticalResIntialized) {
-				buttonTop = getResources().getDrawable(
-						FlattrSDK.getResourceId(
-								FlattrSDK.RESOURCE_BUTTON_VERTICAL_TOP,
-								"drawable", getContext()));
+				buttonTop = getResources().getDrawable(R.drawable.button_vertical_top);
 				tmp = ((BitmapDrawable) buttonTop).getBitmap();
 				buttonTopWidth = tmp.getWidth();
 				buttonTopHeight = tmp.getHeight();
 
-				buttonVMiddle = getResources().getDrawable(
-						FlattrSDK.getResourceId(
-								FlattrSDK.RESOURCE_BUTTON_VERTICAL_MIDDLE,
-								"drawable", getContext()));
+				buttonVMiddle = getResources().getDrawable(R.drawable.button_vertical_middle);
 				tmp = ((BitmapDrawable) buttonVMiddle).getBitmap();
 				buttonVMiddleWidth = tmp.getWidth();
 				buttonVMiddleHeight = tmp.getHeight();
 
 				buttonBottomFlattr = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_FLATTR,
-												"drawable", getContext()));
+						.getDrawable(R.drawable.button_vertical_bottom_flattr);
 				((BitmapDrawable) buttonBottomFlattr).setAntiAlias(true);
 				buttonBottomFlattred = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_FLATTRED,
-												"drawable", getContext()));
+						.getDrawable(R.drawable.button_vertical_bottom_flattred);
 				((BitmapDrawable) buttonBottomFlattred).setAntiAlias(true);
 				buttonBottomMyThing = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_MYTHING,
-												"drawable", getContext()));
+						.getDrawable(R.drawable.button_vertical_bottom_mything);
 				((BitmapDrawable) buttonBottomMyThing).setAntiAlias(true);
 				buttonBottomInactive = getResources()
-						.getDrawable(
-								FlattrSDK
-										.getResourceId(
-												FlattrSDK.RESOURCE_BUTTON_VERTICAL_BOTTOM_INACTIVE,
-												"drawable", getContext()));
+						.getDrawable(R.drawable.button_vertical_bottom_inactive);
 				((BitmapDrawable) buttonBottomInactive).setAntiAlias(true);
 				tmp = ((BitmapDrawable) buttonBottomFlattr).getBitmap();
 				buttonBottomWidth = tmp.getWidth();
