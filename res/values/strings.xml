@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="install_app">Install the Flattr application</string>
+	<string name="install_app">Install Open Flattr</string>
 	<string name="go_to_flattr">Go to Flattr Web Site</string>
 	<string name="choose_option">Choose an option</string>
-	
 </resources>
