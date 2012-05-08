@@ -14,8 +14,10 @@
  */
 package com.flattr4android.sdk;
 
-import com.flattr4android.rest.FlattrRestClient;
-import com.flattr4android.rest.Thing;
+import org.shredzone.flattr4j.FlattrFactory;
+import org.shredzone.flattr4j.FlattrService;
+import org.shredzone.flattr4j.OpenService;
+import org.shredzone.flattr4j.model.Thing;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -78,9 +80,9 @@ public class FlattrButton extends View {
 
 	private String style = BUTTON_STYLE_HORIZONTAL;
 
-	private FlattrRestClient flattrClient;
+	private OpenService flattrService;
 	private String thingId;
-	private int thingStatus;
+	private ThingStatus thingStatus;
 	private int thingClicks;
 	private boolean loading = false, thingSet = false,
 			thingStatusKnown = false;
@@ -89,8 +91,10 @@ public class FlattrButton extends View {
 
 	public FlattrButton(Context context) throws FlattrSDKException {
 		super(context);
+		
 		initResources();
 		initListener();
+		flattrService = FlattrFactory.getInstance().createOpenService();
 	}
 
 	public FlattrButton(Context context, AttributeSet attrs)
@@ -99,15 +103,13 @@ public class FlattrButton extends View {
 
 		setThingId(getAttribute(attrs, "thing_id", false));
 
-		setFlattrCredentials(getAttribute(attrs, "token", false),
-				getAttribute(attrs, "token_secret", false));
-
 		String style = getAttribute(attrs, "button_style", false);
 		if (style != null) {
 			setButtonStyle(style);
 		}
 		initResources();
 		initListener();
+		flattrService = FlattrFactory.getInstance().createOpenService();
 	}
 
 	private void initListener() {
@@ -124,29 +126,20 @@ public class FlattrButton extends View {
 		});
 	}
 
-	/**
-	 * Set Oauth credentials, got from <a
-	 * href="http://flattr4android.com/sdk/">Flattr4Android.com</a>.
-	 */
-	public synchronized void setFlattrCredentials(String token,
-			String tokenSecret) {
-		flattrClient = new FlattrRestClient(FlattrSDK.CONSUMER_KEY,
-				FlattrSDK.CONSUMER_SECRET, token, tokenSecret);
-		if ((thingId != null) && (!loading)) {
+	private synchronized void loadThing(boolean forceIfThingExists) {
+		if (((thingId != null) && (flattrService != null) && (!loading)) && 
+			(forceIfThingExists || !thingSet)) {
 			loading = true;
-			new ThingLoader(this, flattrClient, thingId).execute();
+			new ThingLoader(this, flattrService, thingId).execute();
 		}
 	}
-
+	
 	/**
 	 * Set REST client.
 	 */
-	public synchronized void setFlattrRestClient(FlattrRestClient client) {
-		flattrClient = client;
-		if ((thingId != null) && (!loading)) {
-			loading = true;
-			new ThingLoader(this, flattrClient, thingId).execute();
-		}
+	public synchronized void setFlattrRestClient(FlattrService service) {
+		flattrService = service;
+		loadThing(true);
 	}
 
 	/**
@@ -156,21 +149,22 @@ public class FlattrButton extends View {
 	 */
 	public synchronized void setThingId(String thingId) {
 		this.thingId = thingId;
-		if (flattrClient != null) {
-			Thing cachedThing = flattrClient.getCachedThingById(thingId);
-			if (cachedThing != null) {
-				initWithThing(cachedThing, true);
-			}
-		}
-		if ((flattrClient != null) && (thingId != null) && (!loading)) {
+// TODO: What is the best alternative to "cached thing" in FLattr4J?
+//		if (flattrService != null) {
+//			Thing cachedThing = flattrService.getThing(Thing.withId(thingId));
+//			if (cachedThing != null) {
+//				initWithThing(cachedThing, true);
+//			}
+//		}
+		if ((flattrService != null) && (thingId != null) && (!loading)) {
 			loading = true;
-			new ThingLoader(this, flattrClient, thingId).execute();
+			new ThingLoader(this, flattrService, thingId).execute();
 		}
 	}
 
 	public void initWithThing(Thing thing, boolean thingGotAsUser) {
-		this.thingId = thing.getId();
-		this.thingStatus = thing.getIntStatus();
+		this.thingId = thing.getThingId();
+		this.thingStatus = FlattrSDK.getStatus(thing);
 		this.thingClicks = thing.getClicks();
 		this.thingGotAsUser = thingGotAsUser;
 		this.thingStatusKnown = true;
@@ -414,16 +408,16 @@ public class FlattrButton extends View {
 
 			Drawable buttonBottom;
 			switch (getThingStatus()) {
-			case (Thing.INT_STATUS_CLICKED):
+			case FLATTRED:
 				buttonBottom = buttonBottomFlattred;
 				break;
-			case (Thing.INT_STATUS_INACTIVE):
+			case INACTIVE:
 				buttonBottom = buttonBottomInactive;
 				break;
-			case (Thing.INT_STATUS_OK):
+			case DEFAULT:
 				buttonBottom = buttonBottomFlattr;
 				break;
-			case (Thing.INT_STATUS_OWNER):
+			case OWNER:
 				buttonBottom = buttonBottomMyThing;
 				break;
 			default:
@@ -450,16 +444,16 @@ public class FlattrButton extends View {
 		} else {
 			Drawable buttonLeft;
 			switch (getThingStatus()) {
-			case (Thing.INT_STATUS_CLICKED):
+			case FLATTRED:
 				buttonLeft = buttonLeftFlattred;
 				break;
-			case (Thing.INT_STATUS_INACTIVE):
+			case INACTIVE:
 				buttonLeft = buttonLeftInactive;
 				break;
-			case (Thing.INT_STATUS_OK):
+			case DEFAULT:
 				buttonLeft = buttonLeftFlattr;
 				break;
-			case (Thing.INT_STATUS_OWNER):
+			case OWNER:
 				buttonLeft = buttonLeftMyThing;
 				break;
 			default:
@@ -484,15 +478,18 @@ public class FlattrButton extends View {
 				drawHorizontalClick(canvas, "?");
 			}
 		}
+		
+		// Load the status if not done
+		loadThing(false);
 	}
 
-	public int getThingStatus() {
+	public ThingStatus getThingStatus() {
 		if (thingStatusKnown && thingSet && thingGotAsUser) {
 			return thingStatus;
 		} else {
 			// As long as we don't know the real status, display a default
 			// button
-			return Thing.INT_STATUS_OK;
+			return ThingStatus.DEFAULT;
 		}
 	}
 
@@ -513,13 +510,13 @@ public class FlattrButton extends View {
 	class ThingLoader extends AsyncTask<Void, Void, Void> {
 
 		private FlattrButton button;
-		private FlattrRestClient flattrClient;
+		private OpenService flattrService;
 		private String thingId;
 
-		public ThingLoader(FlattrButton button, FlattrRestClient flattrClient,
+		public ThingLoader(FlattrButton button, OpenService flattrService,
 				String thingId) {
 			this.button = button;
-			this.flattrClient = flattrClient;
+			this.flattrService = flattrService;
 			this.thingId = thingId;
 
 			// Invalidate the current status, if any
@@ -539,8 +536,9 @@ public class FlattrButton extends View {
 				if ((c != null) && (c.moveToFirst())) {
 					Log.d(FlattrSDK.LOG_TAG, "Thing " + thingId
 							+ " got from Flattr application");
-					button.thingStatus = c.getInt(c
-							.getColumnIndex("int_status"));
+// TODO: Get the actual status
+//					button.thingStatus = c.getInt(c.getColumnIndex("int_status"));
+					button.thingStatus = ThingStatus.DEFAULT;
 					button.thingClicks = c.getInt(c.getColumnIndex("clicks"));
 					// Thing obtained with the user credentials (ie. the
 					// Flattr app)
@@ -557,12 +555,12 @@ public class FlattrButton extends View {
 			// Second plan: get the thing with local means
 			try {
 				if (!button.thingSet) {
-					Thing thing = flattrClient.getThing(thingId);
+					Thing thing = flattrService.getThing(Thing.withId(thingId));
 
 					Log.d(FlattrSDK.LOG_TAG, "Thing " + thingId
 							+ " got with local means");
 
-					button.thingStatus = thing.getIntStatus();
+					button.thingStatus = FlattrSDK.getStatus(thing);
 					button.thingClicks = thing.getClicks();
 					// Thing obtained with the app credentials
 					button.thingGotAsUser = false;

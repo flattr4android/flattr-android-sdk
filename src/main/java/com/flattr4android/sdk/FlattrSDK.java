@@ -14,6 +14,8 @@
  */
 package com.flattr4android.sdk;
 
+import org.shredzone.flattr4j.model.Thing;
+
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -209,4 +211,8 @@ public class FlattrSDK {
 		return valueOrRef;
 	}
 
+	public static ThingStatus getStatus(Thing thing) {
+		// TODO: Implement me!
+		return ThingStatus.DEFAULT;
+	}
 }
